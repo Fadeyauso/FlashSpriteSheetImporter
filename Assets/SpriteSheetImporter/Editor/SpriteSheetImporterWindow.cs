@@ -32,6 +32,7 @@ namespace Prankard.FlashSpriteSheetImporter
         private bool generateSpriteSheet = false;
         private bool generateAnimationController = false;
         private bool generateGameObject = false;
+        private bool useImageInsteadOfSprite = false;
         private float fps = 24.0f;
 
         private string errorMessage = null;
@@ -94,6 +95,7 @@ namespace Prankard.FlashSpriteSheetImporter
                     generateAnimationController = EditorGUILayout.Toggle("Create Anim Controller", generateGameObject ? true : generateAnimationController);
                 }
                 generateGameObject = EditorGUILayout.Toggle("Create GameObject", generateGameObject);
+                useImageInsteadOfSprite = EditorGUILayout.Toggle("Use Image", useImageInsteadOfSprite);
             }
 
             GUILayout.Space(10);
@@ -116,7 +118,7 @@ namespace Prankard.FlashSpriteSheetImporter
                         Debug.Log("Imported Sprites");
                         if (generateSpriteSheet)
                         {
-                            AnimationCreator.GenerateAnimation(spriteSheet, fps, generateAnimationController, generateGameObject);
+                            AnimationCreator.GenerateAnimation(spriteSheet, fps, generateAnimationController, generateGameObject, useImageInsteadOfSprite);
                         }
 
                         return;

@@ -24,13 +24,13 @@ namespace Prankard.FlashSpriteSheetImporter
             public Sprite[] sprites;
         }
 
-        public static void GenerateAnimation(Texture2D texture, float fps, bool createAnimationController, bool generateGameObject)
+        public static void GenerateAnimation(Texture2D texture, float fps, bool createAnimationController, bool generateGameObject, bool useImage)
         {
             var assetPath = AssetDatabase.GetAssetPath(texture);
             GenerateAnimation(assetPath, fps, createAnimationController, generateGameObject);
         }
 
-        public static void GenerateAnimation(string spriteSheetPath, float fps, bool createAnimationController, bool generateGameObject)
+        public static void GenerateAnimation(string spriteSheetPath, float fps, bool createAnimationController, bool generateGameObject, bool useImage)
         {
             if (generateGameObject)
                 createAnimationController = true;
@@ -83,7 +83,15 @@ namespace Prankard.FlashSpriteSheetImporter
                     go = new GameObject(gameObjectName);
                 }
 
-                GetOrAddComponent<SpriteRenderer>(go).sprite = sprites[0];
+                if (useImage)
+                {
+                    GetOrAddComponent<Image>(go).sprite = sprites[0];
+                }
+                else
+                {
+                    GetOrAddComponent<SpriteRenderer>(go).sprite = sprites[0];
+                }
+
                 GetOrAddComponent<Animator>(go).runtimeAnimatorController = controller;
             }
         }
@@ -144,9 +152,9 @@ namespace Prankard.FlashSpriteSheetImporter
             return spriteAnimations.ToArray();
         }
 
-        private static AnimationClip CreateAnimationClip(SpriteSheetAnimationData spriteAnimation, string saveDirectoryPath)
+        private static AnimationClip CreateAnimationClip(SpriteSheetAnimationData spriteAnimation, string saveDirectoryPath, bool useImage)
         {
-            AnimationClip clip = CreateAnimationClip(spriteAnimation);
+            AnimationClip clip = CreateAnimationClip(spriteAnimation, useImage);
 
             AssetDatabase.CreateAsset(clip, Path.Combine(saveDirectoryPath, spriteAnimation.name + ".anim"));
             AnimationClipSettings clipSettings = AnimationUtility.GetAnimationClipSettings(clip);
@@ -156,14 +164,22 @@ namespace Prankard.FlashSpriteSheetImporter
             return clip;
         }
 
-        private static AnimationClip CreateAnimationClip(SpriteSheetAnimationData spriteAnimation)
+        private static AnimationClip CreateAnimationClip(SpriteSheetAnimationData spriteAnimation, bool useImage)
         {
             AnimationClip clip = UnityEditor.Animations.AnimatorController.AllocateAnimatorClip(spriteAnimation.name);
             clip.frameRate = spriteAnimation.framesPerSecond;
             clip.wrapMode = WrapMode.Loop;
 
             EditorCurveBinding spriteBinding = new EditorCurveBinding();
-            spriteBinding.type = typeof(SpriteRenderer);
+            if (useImage)
+            {
+                spriteBinding.type = typeof(Image);
+            }
+            else
+            {
+                spriteBinding.type = typeof(SpriteRenderer);
+            }
+
             spriteBinding.path = "";
             spriteBinding.propertyName = "m_Sprite";
             ObjectReferenceKeyframe[] spriteKeyFrames = new ObjectReferenceKeyframe[spriteAnimation.sprites.Length];
